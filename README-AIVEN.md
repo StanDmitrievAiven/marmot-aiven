@@ -23,10 +23,16 @@ The following environment variables **must** be set in your Aiven App Runtime co
 
 ### Database Connection (Required)
 
-* `MARMOT_DATABASE_HOST` - PostgreSQL hostname (required)
+**Option 1: Use Aiven's automatic service connection (Recommended)**
+* Connect your PostgreSQL service in the "Connect services" step
+* Aiven will automatically set `DATABASE_URL` environment variable
+* The entrypoint script will automatically parse `DATABASE_URL` and configure Marmot
+
+**Option 2: Manual configuration with individual variables**
+* `MARMOT_DATABASE_HOST` - PostgreSQL hostname (required if DATABASE_URL not set)
 * `MARMOT_DATABASE_PORT` - PostgreSQL port (default: 5432)
 * `MARMOT_DATABASE_USER` - PostgreSQL username (default: marmot)
-* `MARMOT_DATABASE_PASSWORD` - PostgreSQL password (required)
+* `MARMOT_DATABASE_PASSWORD` - PostgreSQL password (required if DATABASE_URL not set)
 * `MARMOT_DATABASE_NAME` - Database name (default: marmot)
 * `MARMOT_DATABASE_SSLMODE` - SSL mode: disable, require, verify-ca, verify-full (default: require)
 

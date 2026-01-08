@@ -9,29 +9,71 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}Starting Marmot...${NC}"
 
-# Validate required environment variables
-if [ -z "$MARMOT_DATABASE_HOST" ]; then
-    echo -e "${RED}Error: MARMOT_DATABASE_HOST must be set${NC}"
-    exit 1
+# Parse DATABASE_URL if provided (Aiven App Runtime format)
+if [ -n "$DATABASE_URL" ]; then
+    echo -e "${GREEN}Parsing DATABASE_URL from Aiven...${NC}"
+    
+    # Remove postgres:// prefix
+    DB_URL="${DATABASE_URL#postgres://}"
+    
+    # Extract user:password@host:port/database?params
+    USER_PASS="${DB_URL%%@*}"
+    HOST_PORT_DB="${DB_URL#*@}"
+    
+    # Extract user and password
+    export MARMOT_DATABASE_USER="${USER_PASS%%:*}"
+    export MARMOT_DATABASE_PASSWORD="${USER_PASS#*:}"
+    
+    # Extract host:port and database?params
+    HOST_PORT="${HOST_PORT_DB%%/*}"
+    DB_PARAMS="${HOST_PORT_DB#*/}"
+    
+    # Extract host and port
+    export MARMOT_DATABASE_HOST="${HOST_PORT%%:*}"
+    export MARMOT_DATABASE_PORT="${HOST_PORT##*:}"
+    
+    # Extract database name (before ?)
+    export MARMOT_DATABASE_NAME="${DB_PARAMS%%\?*}"
+    
+    # Extract sslmode from query params if present
+    if [[ "$DB_PARAMS" == *"sslmode="* ]]; then
+        SSL_PARAM="${DB_PARAMS##*sslmode=}"
+        export MARMOT_DATABASE_SSLMODE="${SSL_PARAM%%&*}"
+    else
+        export MARMOT_DATABASE_SSLMODE="${MARMOT_DATABASE_SSLMODE:-require}"
+    fi
+    
+    echo -e "${GREEN}Database configuration from DATABASE_URL:${NC}"
+    echo "  Host: ${MARMOT_DATABASE_HOST}"
+    echo "  Port: ${MARMOT_DATABASE_PORT}"
+    echo "  User: ${MARMOT_DATABASE_USER}"
+    echo "  Database: ${MARMOT_DATABASE_NAME}"
+    echo "  SSL Mode: ${MARMOT_DATABASE_SSLMODE}"
+else
+    # Use individual variables if DATABASE_URL not provided
+    if [ -z "$MARMOT_DATABASE_HOST" ]; then
+        echo -e "${RED}Error: Either DATABASE_URL or MARMOT_DATABASE_HOST must be set${NC}"
+        exit 1
+    fi
+    
+    if [ -z "$MARMOT_DATABASE_PASSWORD" ]; then
+        echo -e "${RED}Error: MARMOT_DATABASE_PASSWORD must be set${NC}"
+        exit 1
+    fi
+    
+    # Set defaults for optional database parameters
+    export MARMOT_DATABASE_PORT="${MARMOT_DATABASE_PORT:-5432}"
+    export MARMOT_DATABASE_USER="${MARMOT_DATABASE_USER:-marmot}"
+    export MARMOT_DATABASE_NAME="${MARMOT_DATABASE_NAME:-marmot}"
+    export MARMOT_DATABASE_SSLMODE="${MARMOT_DATABASE_SSLMODE:-require}"
+    
+    echo -e "${GREEN}Database configuration:${NC}"
+    echo "  Host: ${MARMOT_DATABASE_HOST}"
+    echo "  Port: ${MARMOT_DATABASE_PORT}"
+    echo "  User: ${MARMOT_DATABASE_USER}"
+    echo "  Database: ${MARMOT_DATABASE_NAME}"
+    echo "  SSL Mode: ${MARMOT_DATABASE_SSLMODE}"
 fi
-
-if [ -z "$MARMOT_DATABASE_PASSWORD" ]; then
-    echo -e "${RED}Error: MARMOT_DATABASE_PASSWORD must be set${NC}"
-    exit 1
-fi
-
-# Set defaults for optional database parameters
-export MARMOT_DATABASE_PORT="${MARMOT_DATABASE_PORT:-5432}"
-export MARMOT_DATABASE_USER="${MARMOT_DATABASE_USER:-marmot}"
-export MARMOT_DATABASE_NAME="${MARMOT_DATABASE_NAME:-marmot}"
-export MARMOT_DATABASE_SSLMODE="${MARMOT_DATABASE_SSLMODE:-require}"
-
-echo -e "${GREEN}Database configuration:${NC}"
-echo "  Host: ${MARMOT_DATABASE_HOST}"
-echo "  Port: ${MARMOT_DATABASE_PORT}"
-echo "  User: ${MARMOT_DATABASE_USER}"
-echo "  Database: ${MARMOT_DATABASE_NAME}"
-echo "  SSL Mode: ${MARMOT_DATABASE_SSLMODE}"
 
 # Set server defaults
 export MARMOT_SERVER_PORT="${MARMOT_SERVER_PORT:-8080}"
