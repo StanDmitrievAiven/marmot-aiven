@@ -108,6 +108,12 @@ export MARMOT_METRICS_ENABLED="${MARMOT_METRICS_ENABLED:-false}"
 export MARMOT_OPENLINEAGE_AUTH_ENABLED="${MARMOT_OPENLINEAGE_AUTH_ENABLED:-true}"
 
 echo -e "${GREEN}Starting Marmot server on ${MARMOT_SERVER_HOST}:${MARMOT_SERVER_PORT}${NC}"
+echo "DEBUG: Final environment variables being passed to Marmot:"
+echo "  MARMOT_DATABASE_HOST=${MARMOT_DATABASE_HOST:-NOT SET}"
+echo "  MARMOT_DATABASE_PORT=${MARMOT_DATABASE_PORT:-NOT SET}"
+echo "  MARMOT_DATABASE_USER=${MARMOT_DATABASE_USER:-NOT SET}"
+echo "  MARMOT_DATABASE_NAME=${MARMOT_DATABASE_NAME:-NOT SET}"
+echo "  MARMOT_DATABASE_SSLMODE=${MARMOT_DATABASE_SSLMODE:-NOT SET}"
 
 # Execute Marmot with provided arguments or default to "run"
 exec /usr/local/bin/marmot "$@"
