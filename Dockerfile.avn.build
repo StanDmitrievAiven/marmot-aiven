@@ -1,0 +1,44 @@
+# Alternative Dockerfile that builds from source
+# Use this if you prefer building from source instead of using the official image
+FROM golang:1.24 as builder
+
+WORKDIR /app
+
+# Copy go mod files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build the binary with production tags
+RUN CGO_ENABLED=0 go build -tags=production -ldflags="-s -w" -o marmot ./cmd/main.go
+
+# Stage 2: Create Debian-based image with shell support
+FROM debian:bookworm-slim
+
+# Install minimal dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN useradd -r -u 10001 -m -s /bin/bash marmot
+
+# Copy Marmot binary from builder
+COPY --from=builder /app/marmot /usr/local/bin/marmot
+RUN chmod +x /usr/local/bin/marmot
+
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+USER marmot
+
+WORKDIR /app
+
+EXPOSE 8080
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["run"]
