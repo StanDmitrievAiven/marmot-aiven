@@ -56,6 +56,8 @@ if [ -n "$DATABASE_URL" ]; then
     echo "  SSL Mode: ${MARMOT_DATABASE_SSLMODE}"
 else
     # Use individual variables if DATABASE_URL not provided
+    echo -e "${GREEN}Using individual MARMOT_DATABASE_* environment variables...${NC}"
+    
     if [ -z "$MARMOT_DATABASE_HOST" ]; then
         echo -e "${RED}Error: Either DATABASE_URL or MARMOT_DATABASE_HOST must be set${NC}"
         exit 1
@@ -70,7 +72,15 @@ else
     export MARMOT_DATABASE_PORT="${MARMOT_DATABASE_PORT:-5432}"
     export MARMOT_DATABASE_USER="${MARMOT_DATABASE_USER:-marmot}"
     export MARMOT_DATABASE_NAME="${MARMOT_DATABASE_NAME:-marmot}"
+    # Aiven PostgreSQL requires SSL - default to 'require' if not set
     export MARMOT_DATABASE_SSLMODE="${MARMOT_DATABASE_SSLMODE:-require}"
+    
+    echo -e "${GREEN}Database configuration from individual variables:${NC}"
+    echo "  Host: ${MARMOT_DATABASE_HOST}"
+    echo "  Port: ${MARMOT_DATABASE_PORT}"
+    echo "  User: ${MARMOT_DATABASE_USER}"
+    echo "  Database: ${MARMOT_DATABASE_NAME}"
+    echo "  SSL Mode: ${MARMOT_DATABASE_SSLMODE}"
     
     echo -e "${GREEN}Database configuration:${NC}"
     echo "  Host: ${MARMOT_DATABASE_HOST}"
