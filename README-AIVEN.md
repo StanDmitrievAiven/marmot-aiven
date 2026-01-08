@@ -34,7 +34,7 @@ The following environment variables **must** be set in your Aiven App Runtime co
 * `MARMOT_DATABASE_USER` - PostgreSQL username (default: marmot)
 * `MARMOT_DATABASE_PASSWORD` - PostgreSQL password (required if DATABASE_URL not set)
 * `MARMOT_DATABASE_NAME` - Database name (default: marmot)
-* `MARMOT_DATABASE_SSLMODE` - SSL mode: disable, require, verify-ca, verify-full (default: require)
+* `MARMOT_DATABASE_SSLMODE` - **REQUIRED for Aiven**: Set to `require` (default: require, but explicitly set it to avoid issues)
 
 ### Server Configuration (Optional)
 
