@@ -45,7 +45,7 @@ The following environment variables **must** be set in your Aiven App Runtime co
 ### Security Configuration (Recommended)
 
 * `MARMOT_SERVER_ENCRYPTION_KEY` - Encryption key for pipeline credentials
-  * **Important**: Generate a secure key using: `marmot generate-key`
+  * **Important**: Generate a secure key using: `docker run --rm ghcr.io/marmotdata/marmot:latest generate-encryption-key`
   * If not set, pipeline credentials will be stored unencrypted (not recommended)
 * `MARMOT_SERVER_ALLOW_UNENCRYPTED` - Allow unencrypted storage (default: false)
 
@@ -81,16 +81,20 @@ For OAuth providers (Google, GitHub, GitLab, Okta, Auth0, Slack), see [Marmot Au
    * Branch: `main`
    * Dockerfile: `Dockerfile.avn` (uses official image) or `Dockerfile.avn.build` (builds from source)
 
-3. **Configure Environment Variables**
-   * Add the required database connection parameters
-   * Set `MARMOT_SERVER_ENCRYPTION_KEY` (generate using `marmot generate-key`)
+3. **Generate and Set Encryption Key**
+   * Run: `docker run --rm ghcr.io/marmotdata/marmot:latest generate-encryption-key`
+   * Copy the generated key
+   * In Aiven App Runtime, add environment variable: `MARMOT_SERVER_ENCRYPTION_KEY` = (paste the generated key)
+
+4. **Configure Environment Variables** (if not using automatic service connection)
+   * Optionally set individual database parameters if not using `DATABASE_URL`
    * Optionally configure authentication, logging, and other settings
 
-4. **Configure Port**
+5. **Configure Port**
    * Open port **8080** in your App Runtime configuration
    * Marmot's web UI will be accessible on this port
 
-5. **Deploy**
+6. **Deploy**
    * Aiven will automatically build and deploy your application
    * Check the logs to verify successful startup and migration
 
@@ -160,17 +164,19 @@ ARG MARMOT_IMAGE=ghcr.io/marmotdata/marmot:v0.5.1
 
 ### Generating Encryption Key
 
-Generate a secure encryption key:
+Generate a secure encryption key using Docker (recommended):
 
 ```bash
-docker run --rm ghcr.io/marmotdata/marmot:latest generate-key
+docker run --rm ghcr.io/marmotdata/marmot:latest generate-encryption-key
 ```
 
 Or if you have Marmot installed locally:
 
 ```bash
-marmot generate-key
+marmot generate-encryption-key
 ```
+
+This will output a base64-encoded 32-byte key. Copy the generated key and set it as an environment variable in Aiven App Runtime.
 
 ### Adding OAuth Authentication
 
@@ -210,7 +216,7 @@ See [Marmot Authentication Documentation](https://marmotdata.io/docs/Configure/a
 ### Encryption Key Issues
 
 * If you see errors about missing encryption key, set `MARMOT_SERVER_ENCRYPTION_KEY`
-* Generate a new key using `marmot generate-key`
+* Generate a new key using: `docker run --rm ghcr.io/marmotdata/marmot:latest generate-encryption-key`
 * Ensure the key is the same across all Marmot instances if running multiple replicas
 
 ## Security Considerations
