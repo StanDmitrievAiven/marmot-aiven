@@ -19,9 +19,10 @@ RUN useradd -r -u 10001 -m -s /bin/bash marmot
 COPY --from=marmot-source /usr/local/bin/marmot /usr/local/bin/marmot
 RUN chmod +x /usr/local/bin/marmot
 
-# Copy entrypoint script
+# Copy entrypoint script (before switching user to ensure proper permissions)
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh && \
+    chown marmot:marmot /entrypoint.sh
 
 USER marmot
 
@@ -29,5 +30,6 @@ WORKDIR /app
 
 EXPOSE 8080
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Use shell form to ensure environment variables are available
+ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
 CMD ["run"]
