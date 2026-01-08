@@ -11,6 +11,8 @@ echo -e "${GREEN}Starting Marmot...${NC}"
 echo "DEBUG: Entrypoint script executed"
 echo "DEBUG: DATABASE_URL=${DATABASE_URL:-NOT SET}"
 echo "DEBUG: MARMOT_DATABASE_HOST=${MARMOT_DATABASE_HOST:-NOT SET}"
+echo "DEBUG: All env vars with DATABASE:"
+env | grep -i database || echo "  No DATABASE-related env vars found"
 
 # Parse DATABASE_URL if provided (Aiven App Runtime format)
 if [ -n "$DATABASE_URL" ]; then
