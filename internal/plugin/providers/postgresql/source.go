@@ -28,11 +28,12 @@ type Config struct {
 	plugin.BaseConfig `json:",inline"`
 
 	// Connection configuration
-	Host     string `json:"host" description:"PostgreSQL server hostname or IP address" validate:"required"`
-	Port     int    `json:"port" description:"PostgreSQL server port" default:"5432" validate:"omitempty,min=1,max=65535"`
-	User     string `json:"user" description:"Username for authentication" validate:"required"`
-	Password string `json:"password" description:"Password for authentication" sensitive:"true"`
-	SSLMode  string `json:"ssl_mode" description:"SSL mode (disable, require, verify-ca, verify-full)" default:"disable" validate:"omitempty,oneof=disable require verify-ca verify-full"`
+	Host            string `json:"host" description:"PostgreSQL server hostname or IP address" validate:"required"`
+	Port            int    `json:"port" description:"PostgreSQL server port" default:"5432" validate:"omitempty,min=1,max=65535"`
+	User            string `json:"user" description:"Username for authentication" validate:"required"`
+	Password        string `json:"password" description:"Password for authentication" sensitive:"true"`
+	SSLMode         string `json:"ssl_mode" description:"SSL mode (disable, require, verify-ca, verify-full)" default:"disable" validate:"omitempty,oneof=disable require verify-ca verify-full"`
+	InitialDatabase string `json:"initial_database" description:"Initial database to connect to for discovery (default: tries 'defaultdb' then 'postgres')" default:""`
 
 	// Discovery configuration
 	IncludeDatabases     bool           `json:"include_databases" description:"Whether to discover databases" default:"true"`
@@ -89,7 +90,19 @@ func (s *Source) Validate(rawConfig plugin.RawPluginConfig) (plugin.RawPluginCon
 func (s *Source) Discover(ctx context.Context, pluginConfig plugin.RawPluginConfig) (*plugin.DiscoveryResult, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
-	if err := s.initConnection(ctx, "postgres"); err != nil {
+	
+	// Determine initial database to connect to
+	initialDB := s.config.InitialDatabase
+	if initialDB == "" {
+		// Try defaultdb first (Aiven), then postgres (standard PostgreSQL)
+		initialDB = "defaultdb"
+		if err := s.initConnection(ctx, initialDB); err != nil {
+			log.Debug().Err(err).Str("database", initialDB).Msg("Failed to connect to defaultdb, trying postgres")
+			initialDB = "postgres"
+		}
+	}
+	
+	if err := s.initConnection(ctx, initialDB); err != nil {
 		return nil, fmt.Errorf("initializing database connection: %w", err)
 	}
 	defer s.closeConnection()
