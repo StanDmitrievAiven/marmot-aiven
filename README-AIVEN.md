@@ -79,7 +79,8 @@ For OAuth providers (Google, GitHub, GitLab, Okta, Auth0, Slack), see [Marmot Au
 2. **Create an App Runtime Application**
    * Source: Point to this GitHub repository
    * Branch: `main`
-   * Dockerfile: `Dockerfile.avn` (uses official image) or `Dockerfile.avn.build` (builds from source)
+   * Dockerfile: **Use `Dockerfile.avn.build`** (builds from source with frontend included)
+   * Note: `Dockerfile.avn` uses the official image which may not have static files embedded
 
 3. **Generate and Set Encryption Key**
    * Run: `docker run --rm ghcr.io/marmotdata/marmot:latest generate-encryption-key`
