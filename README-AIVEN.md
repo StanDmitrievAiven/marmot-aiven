@@ -141,6 +141,110 @@ After logging in with these credentials, you should:
 2. Configure OAuth authentication for production use (recommended)
 3. Or enable anonymous access for development/testing by setting `MARMOT_AUTH_ANONYMOUS_ENABLED=true`
 
+## Connecting Data Sources
+
+Marmot uses the **Marmot CLI** to ingest metadata from data sources. Here's how to connect your PostgreSQL database:
+
+### Step 1: Install the Marmot CLI
+
+```bash
+curl -fsSL get.marmotdata.io | sh
+```
+
+Or download from: https://github.com/marmotdata/marmot/releases
+
+### Step 2: Get an API Key
+
+**Option A: Via Web UI (Recommended)**
+1. Log into your Marmot instance (running on Aiven)
+2. Click on your **user profile icon** (top right)
+3. Select **"Profile"** from the dropdown
+4. Click on the **"API Keys"** tab
+5. Click **"New Key"** button
+6. Enter a name for your API key (e.g., "CLI Access")
+7. Click **"Generate Key"**
+8. **Copy the key immediately** - it's only shown once!
+
+**Option B: Via API (if UI doesn't work)**
+```bash
+curl -X POST https://<your-hostname>:8080/api/v1/users/apikeys \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -d '{"name": "CLI Access"}'
+```
+
+To get your JWT token, log in via the UI and check your browser's localStorage for the `jwt` key, or use the login API endpoint.
+
+### Step 3: Create a Pipeline Configuration
+
+Create a `pipeline.yaml` file with your data source configuration:
+
+```yaml
+name: "test-postgres-pipeline"
+
+runs:
+  - test_postgres:
+      source: "postgresql"
+      host: "pg-19acf03c-stan-dmitriev-test.l.aivencloud.com"
+      port: 19030
+      user: "avnadmin"
+      password: "${POSTGRES_PASSWORD}"  # Set via environment variable
+      ssl_mode: "require"
+      include_databases: true
+      include_columns: true
+      enable_metrics: true
+      discover_foreign_keys: true
+      exclude_system_schemas: true
+      tags:
+        - "postgres"
+        - "aiven"
+        - "test"
+```
+
+### Step 4: Set Your Password as an Environment Variable
+
+```bash
+export POSTGRES_PASSWORD="AVNS_nrj71y-QN2VxLiR0hUk"
+```
+
+### Step 5: Run the Ingestion
+
+```bash
+marmot ingest \
+  --config pipeline.yaml \
+  --host https://<your-aiven-app-hostname>:8080 \
+  --api-key <your-api-key-from-step-2>
+```
+
+Replace:
+- `<your-aiven-app-hostname>` with your Aiven App Runtime hostname
+- `<your-api-key-from-step-2>` with the API key you created
+
+### Supported Data Sources
+
+Marmot supports many data sources including:
+- **PostgreSQL** (as shown above)
+- **MySQL**
+- **BigQuery**
+- **Snowflake**
+- **S3** / **GCS** / **Azure Blob Storage**
+- **Kafka**
+- **MongoDB**
+- **ClickHouse**
+- **Airflow**
+- **dbt**
+- And more...
+
+See the [Marmot Plugins Documentation](https://marmotdata.io/docs/Plugins) for full configuration options.
+
+### Troubleshooting API Key Creation
+
+If you can't create API keys via the UI:
+1. **Check you're logged in** - API keys require authentication
+2. **Check browser console** - Look for any JavaScript errors
+3. **Try the API directly** - Use Option B above with your JWT token
+4. **Check permissions** - Ensure your user account is active
+
 ## Project Structure
 
 ```
