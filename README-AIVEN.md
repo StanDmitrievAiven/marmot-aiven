@@ -106,6 +106,25 @@ Once deployed, access the Marmot web UI at:
 https://<your-app-hostname>:8080/
 ```
 
+**Troubleshooting:**
+
+If you see a "404 page not found" error:
+
+1. **Check the health endpoint** to verify the app is running:
+   ```
+   https://<your-app-hostname>:8080/api/v1/health
+   ```
+   This should return `{"status":"ok"}` if the app is running correctly.
+
+2. **Check application logs** in Aiven to see if there are any errors during startup.
+
+3. **Verify the static files are embedded** - The official Marmot image should include the web UI. If you're using `Dockerfile.avn.build`, ensure the frontend is built before building the Docker image.
+
+4. **Try accessing the Swagger UI** to verify API endpoints are working:
+   ```
+   https://<your-app-hostname>:8080/swagger/index.html
+   ```
+
 **Note:** By default, anonymous authentication is disabled. Configure OAuth authentication or enable anonymous access for development/testing.
 
 ## Project Structure
