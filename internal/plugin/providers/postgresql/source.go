@@ -99,11 +99,14 @@ func (s *Source) Discover(ctx context.Context, pluginConfig plugin.RawPluginConf
 		if err := s.initConnection(ctx, initialDB); err != nil {
 			log.Debug().Err(err).Str("database", initialDB).Msg("Failed to connect to defaultdb, trying postgres")
 			initialDB = "postgres"
+			if err := s.initConnection(ctx, initialDB); err != nil {
+				return nil, fmt.Errorf("initializing database connection: %w", err)
+			}
 		}
-	}
-	
-	if err := s.initConnection(ctx, initialDB); err != nil {
-		return nil, fmt.Errorf("initializing database connection: %w", err)
+	} else {
+		if err := s.initConnection(ctx, initialDB); err != nil {
+			return nil, fmt.Errorf("initializing database connection: %w", err)
+		}
 	}
 	defer s.closeConnection()
 
