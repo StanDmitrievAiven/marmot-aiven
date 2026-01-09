@@ -128,6 +128,19 @@ If you see a "404 page not found" error:
 
 **Note:** By default, anonymous authentication is disabled. Configure OAuth authentication or enable anonymous access for development/testing.
 
+## Default Login Credentials
+
+Marmot creates a default admin user on first startup:
+
+* **Username**: `admin`
+* **Password**: `admin`
+* **Note**: You will be required to change the password on first login
+
+After logging in with these credentials, you should:
+1. Change the admin password immediately
+2. Configure OAuth authentication for production use (recommended)
+3. Or enable anonymous access for development/testing by setting `MARMOT_AUTH_ANONYMOUS_ENABLED=true`
+
 ## Project Structure
 
 ```
