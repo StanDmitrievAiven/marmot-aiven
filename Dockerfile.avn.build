@@ -1,5 +1,23 @@
 # Alternative Dockerfile that builds from source
 # Use this if you prefer building from source instead of using the official image
+# This ensures the frontend is built and embedded in the binary
+
+# Stage 1: Build frontend
+FROM node:20-alpine as frontend-builder
+
+WORKDIR /app
+
+# Copy frontend files
+COPY web/marmot/package.json web/marmot/pnpm-lock.yaml ./web/marmot/
+COPY web/marmot ./web/marmot
+
+# Install pnpm and dependencies, then build
+RUN npm install -g pnpm && \
+    cd web/marmot && \
+    pnpm install && \
+    pnpm build
+
+# Stage 2: Build Go binary with embedded frontend
 FROM golang:1.24 as builder
 
 WORKDIR /app
@@ -11,7 +29,10 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the binary with production tags
+# Copy built frontend from frontend-builder stage
+COPY --from=frontend-builder /app/web/marmot/build ./internal/staticfiles/build
+
+# Build the binary with production tags (this embeds the frontend)
 RUN CGO_ENABLED=0 go build -tags=production -ldflags="-s -w" -o marmot ./cmd/main.go
 
 # Stage 2: Create Debian-based image with shell support
