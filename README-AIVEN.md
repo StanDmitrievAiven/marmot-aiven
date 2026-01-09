@@ -204,7 +204,7 @@ runs:
 ### Step 4: Set Your Password as an Environment Variable
 
 ```bash
-export POSTGRES_PASSWORD="AVNS_nrj71y-QN2VxLiR0hUk"
+export POSTGRES_PASSWORD="your-actual-password-from-aiven"
 ```
 
 ### Step 5: Run the Ingestion
