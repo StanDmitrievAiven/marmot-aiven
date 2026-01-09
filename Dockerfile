@@ -22,12 +22,19 @@ FROM golang:1.24 as builder
 
 WORKDIR /app
 
+# Install swag for generating Swagger docs
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
 # Copy go mod files
 COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source code
 COPY . .
+
+# Generate Swagger docs (required for the docs package import)
+# The main API server annotations are in internal/api/v1/server.go
+RUN swag init -g internal/api/v1/server.go -o ./docs --parseDependency --parseInternal
 
 # Copy built frontend from frontend-builder stage
 COPY --from=frontend-builder /app/web/marmot/build ./internal/staticfiles/build
