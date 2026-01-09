@@ -112,9 +112,9 @@ If you see a "404 page not found" error:
 
 1. **Check the health endpoint** to verify the app is running:
    ```
-   https://<your-app-hostname>:8080/api/v1/health
+   https://<your-app-hostname>:8080/health
    ```
-   This should return `{"status":"ok"}` if the app is running correctly.
+   This should return `{"status":"healthy"}` if the app is running correctly.
 
 2. **Check application logs** in Aiven to see if there are any errors during startup.
 
