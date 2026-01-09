@@ -33,8 +33,9 @@ RUN go mod download
 COPY . .
 
 # Generate Swagger docs (required for the docs package import)
-# The main API server annotations are in internal/api/v1/server.go
-RUN swag init -g internal/api/v1/server.go -o ./docs --parseDependency --parseInternal
+# Swagger annotations are in internal/api/v1/server.go
+# Run from module root to generate github.com/marmotdata/marmot/docs package
+RUN swag init -g ./cmd/main.go --parseDependency --parseInternal -o ./docs
 
 # Copy built frontend from frontend-builder stage
 COPY --from=frontend-builder /app/web/marmot/build ./internal/staticfiles/build
