@@ -79,8 +79,8 @@ For OAuth providers (Google, GitHub, GitLab, Okta, Auth0, Slack), see [Marmot Au
 2. **Create an App Runtime Application**
    * Source: Point to this GitHub repository
    * Branch: `main`
-   * Dockerfile: **Use `Dockerfile.avn.build`** (builds from source with frontend included)
-   * Note: `Dockerfile.avn` uses the official image which may not have static files embedded
+   * Dockerfile: `Dockerfile` (automatically detected by Aiven)
+   * Note: This builds from source with frontend included, ensuring the web UI is properly embedded
 
 3. **Generate and Set Encryption Key**
    * Run: `docker run --rm ghcr.io/marmotdata/marmot:latest generate-encryption-key`
@@ -149,26 +149,20 @@ Builds Marmot from source. Use this if you need to customize the build or if you
 
 ## How It Works
 
-### Using Dockerfile.avn (Official Image)
+The Dockerfile uses a multi-stage build process:
 
-1. **Build Stage 1**: Extracts the Marmot binary from the official `ghcr.io/marmotdata/marmot:latest` image
-2. **Build Stage 2**: Creates a Debian-based image with:
-   * The Marmot binary copied from stage 1
+1. **Frontend Build Stage**: Builds the Marmot web UI using Node.js and pnpm
+2. **Go Build Stage**: Compiles the Go binary with the frontend embedded using `-tags=production`
+3. **Runtime Stage**: Creates a minimal Debian-based image with:
+   * The Marmot binary (with embedded frontend)
    * Shell support for running the entrypoint script
    * Entrypoint script for configuration validation and startup
 
-### Using Dockerfile.avn.build (Build from Source)
-
-1. **Build Stage 1**: Builds the Marmot binary from source using Go
-2. **Build Stage 2**: Creates a Debian-based image with:
-   * The Marmot binary from the build stage
-   * Shell support for running the entrypoint script
-   * Entrypoint script for configuration validation and startup
-
-### Runtime (Both Dockerfiles)
+### Runtime
 
 The entrypoint script:
 * Validates required environment variables
+* Parses `DATABASE_URL` if provided by Aiven
 * Sets defaults for optional configuration
 * Starts the Marmot server (which automatically runs migrations)
 

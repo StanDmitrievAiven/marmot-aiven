@@ -1,6 +1,6 @@
-# Alternative Dockerfile that builds from source
-# Use this if you prefer building from source instead of using the official image
-# This ensures the frontend is built and embedded in the binary
+# Dockerfile for Aiven App Runtime
+# Builds Marmot from source with frontend embedded
+# This ensures the web UI is properly included in the binary
 
 # Stage 1: Build frontend
 FROM node:20-alpine as frontend-builder
