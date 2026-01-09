@@ -119,7 +119,7 @@ If you see a "404 page not found" error:
 
 2. **Check application logs** in Aiven to see if there are any errors during startup.
 
-3. **Verify the static files are embedded** - The official Marmot image should include the web UI. If you're using `Dockerfile.avn.build`, ensure the frontend is built before building the Docker image.
+3. **Verify the static files are embedded** - The Dockerfile builds the frontend and embeds it in the binary. Check build logs to ensure the frontend build stage completes successfully.
 
 4. **Try accessing the Swagger UI** to verify API endpoints are working:
    ```

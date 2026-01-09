@@ -35,7 +35,7 @@ COPY --from=frontend-builder /app/web/marmot/build ./internal/staticfiles/build
 # Build the binary with production tags (this embeds the frontend)
 RUN CGO_ENABLED=0 go build -tags=production -ldflags="-s -w" -o marmot ./cmd/main.go
 
-# Stage 2: Create Debian-based image with shell support
+# Stage 3: Create Debian-based image with shell support
 FROM debian:bookworm-slim
 
 # Install minimal dependencies
